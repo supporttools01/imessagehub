@@ -96,8 +96,18 @@ function displayRouteName(route) {
 function displayCampaignStatus(status) {
   const value = String(status || "processing").toLowerCase();
   if (["failed", "cancelled"].includes(value)) return "FAILED";
+  if (value === "approved") return "APPROVED";
+  if (["sent", "completed"].includes(value)) return "SENT";
   if (value === "delivered") return "DELIVERED";
   return "SUBMITTED";
+}
+
+function historyStatusClass(status) {
+  const value = String(status || "submitted").toLowerCase();
+  if (["sent", "completed"].includes(value)) return "status-sent";
+  if (value === "approved") return "status-approved";
+  if (["failed", "cancelled"].includes(value)) return "status-failed";
+  return "status-submitted";
 }
 
 function showAccessProblem(email = "") {
@@ -697,6 +707,10 @@ function renderAdminSendingHistory() {
 
   rows.forEach((campaign, index) => {
     const phones = Array.isArray(campaign.phones) ? campaign.phones.filter(Boolean) : [];
+    const workflowStatus = String(campaign.campaign_status || "submitted").toLowerCase();
+    const canApprove = ["processing", "submitted"].includes(workflowStatus);
+    const canMarkSent = workflowStatus === "approved";
+    const isSent = ["sent", "completed"].includes(workflowStatus);
     const card = document.createElement("article");
     card.className = "admin-history-card";
     card.innerHTML = `
@@ -706,7 +720,7 @@ function renderAdminSendingHistory() {
           <h3>${escapeHtml(campaign.source_file_name || campaign.campaign_name || "Campaign")}</h3>
           <p>${formatDate(campaign.created_at)} · ${escapeHtml(campaign.sender_id || "iMessage-Direct")}</p>
         </div>
-        <span class="admin-history-status">${escapeHtml(campaign.campaign_status || "processing")}</span>
+        <span class="admin-history-status ${historyStatusClass(workflowStatus)}">${displayCampaignStatus(workflowStatus)}</span>
       </div>
       <div class="admin-history-message">${escapeHtml(campaign.message || "No message text saved.")}</div>
       <div class="admin-history-stats">
@@ -717,6 +731,9 @@ function renderAdminSendingHistory() {
       <div class="admin-history-actions">
         <button class="btn-primary" type="button" data-history-toggle>View numbers</button>
         <button class="btn-secondary" type="button" data-history-download ${phones.length ? "" : "disabled"}>Download data</button>
+        ${canApprove ? '<button class="admin-history-workflow approve" type="button" data-history-approve>Approve</button>' : ""}
+        ${canMarkSent ? '<button class="admin-history-workflow sent" type="button" data-history-sent>Mark as Sent</button>' : ""}
+        ${isSent ? `<span class="admin-history-complete">✓ Sent successfully · ${campaign.wallet_charged ? "Balance charged" : "Already charged"}</span>` : ""}
       </div>
       <pre class="admin-history-numbers">${escapeHtml(phones.length ? phones.join("\n") : "Numbers are not available for this record.")}</pre>`;
 
@@ -736,8 +753,52 @@ function renderAdminSendingHistory() {
       link.remove();
       URL.revokeObjectURL(link.href);
     });
+    card.querySelector("[data-history-approve]")?.addEventListener("click", (event) => {
+      updateCampaignWorkflow("approve", campaign, event.currentTarget);
+    });
+    card.querySelector("[data-history-sent]")?.addEventListener("click", (event) => {
+      updateCampaignWorkflow("sent", campaign, event.currentTarget);
+    });
     adminHistoryList.appendChild(card);
   });
+}
+
+async function updateCampaignWorkflow(action, campaign, button) {
+  if (!supabase || !campaign?.campaign_id || !button) return;
+
+  if (action === "sent") {
+    const confirmed = window.confirm(
+      `Mark this campaign as sent? The customer's balance will be charged ${money(campaign.total_cost)} exactly once.`
+    );
+    if (!confirmed) return;
+  }
+
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = action === "approve" ? "Approving…" : "Marking…";
+
+  try {
+    const rpcName = action === "approve" ? "admin_approve_campaign" : "admin_mark_campaign_sent";
+    const { data, error } = await supabase.rpc(rpcName, { p_campaign_id: campaign.campaign_id });
+    if (error) throw error;
+    const result = Array.isArray(data) ? data[0] : data;
+    if (action === "approve") {
+      showToast("Campaign approved. Send it externally, then mark it as sent.", "success");
+    } else {
+      showToast(
+        result?.charged === false
+          ? "Campaign marked sent. This legacy campaign was already charged."
+          : `Campaign marked sent and ${money(result?.total_cost || campaign.total_cost)} charged successfully.`,
+        "success"
+      );
+    }
+    await Promise.all([loadAdminSendingHistory(), loadUsersAndActivity()]);
+  } catch (error) {
+    console.error(`Campaign ${action} error:`, error);
+    showToast(error.message || "Unable to update campaign.", "error");
+    button.disabled = false;
+    button.textContent = original;
+  }
 }
 
 async function loadAdminSendingHistory() {

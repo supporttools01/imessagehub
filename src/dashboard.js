@@ -748,7 +748,7 @@ async function loadPaymentHistory() {
 
 function outboxStatusLabel(status) {
   const value = String(status || "pending").toLowerCase();
-  if (value === "sent") return "Sent";
+  if (value === "sent") return "Sent Successfully";
   if (value === "delivered") return "Delivered";
   if (value === "failed") return "Failed";
   return "Submitted";
@@ -764,8 +764,8 @@ function renderOutboxSummary(records) {
   const summary = records.reduce((totals, record) => {
     const label = outboxStatusLabel(record.status);
     totals.total += 1;
-    totals.charges += outboxRecordCost(record);
-    if (label === "Sent") totals.sent += 1;
+    if (["Sent Successfully", "Delivered"].includes(label)) totals.charges += outboxRecordCost(record);
+    if (label === "Sent Successfully") totals.sent += 1;
     else if (label === "Delivered") totals.delivered += 1;
     else if (label === "Failed") totals.failed += 1;
     else totals.submitted += 1;
@@ -798,7 +798,7 @@ function renderOutboxRecords(records) {
     const routeName = route?.displayName || "Route";
     const perMessageCost = outboxRecordCost(record);
     const label = outboxStatusLabel(record.status);
-    const successful = label === "Sent" || label === "Delivered";
+    const successful = label === "Sent Successfully" || label === "Delivered";
     const statusClass = successful ? "status-success" : label === "Failed" ? "status-failed" : "";
 
     const row = document.createElement("tr");
@@ -831,9 +831,10 @@ function applyOutboxFilters() {
 
   const filtered = outboxRecordsCache.filter((record) => {
     const createdTime = new Date(record.created_at).getTime();
-    const label = outboxStatusLabel(record.status).toLowerCase().replace(" ", "-");
+    const rawStatus = String(record.status || "pending").toLowerCase();
+    const statusKey = ["pending", "sending", "processing", "approved"].includes(rawStatus) ? "submitted" : rawStatus;
     const matchesDate = (!fromTime || createdTime >= fromTime) && (!toTime || createdTime <= toTime);
-    const matchesStatus = selectedStatus === "all" || label === selectedStatus;
+    const matchesStatus = selectedStatus === "all" || statusKey === selectedStatus;
     return matchesDate && matchesStatus;
   });
 
@@ -988,7 +989,7 @@ async function submitCampaign() {
     if (error) throw error;
 
     const result = Array.isArray(data) ? data[0] : data;
-    currentWalletBalance = Number(result?.new_balance ?? currentWalletBalance - estimatedCost);
+    currentWalletBalance = Number(result?.new_balance ?? currentWalletBalance);
     const formattedBalance = money(currentWalletBalance);
     if (els.walletBalance) els.walletBalance.textContent = formattedBalance;
     if (els.walletBalanceTop) els.walletBalanceTop.textContent = formattedBalance;
@@ -1001,24 +1002,8 @@ async function submitCampaign() {
       els.successCampaignCost.textContent = money(result?.total_cost ?? estimatedCost);
     }
 
-    const { data: dispatchResult, error: dispatchError } = await supabase.functions.invoke(
-      "send-telnyx-campaign",
-      { body: { campaignId: result?.campaign_id } }
-    );
-
-    if (dispatchError) {
-      console.error("Telnyx dispatch error:", dispatchError);
-      showToast("Campaign submitted, but provider dispatch is not configured yet.", "error");
-    } else if (Number(dispatchResult?.sent || 0) > 0) {
-      showToast(
-        `${Number(dispatchResult.sent).toLocaleString()} message(s) accepted by Telnyx.`,
-        "success"
-      );
-    } else if (Number(dispatchResult?.failed || 0) > 0) {
-      showToast(dispatchResult?.reason || "Telnyx rejected the campaign.", "error");
-    }
-
     openModal(els.campaignSuccessModal);
+    showToast("Campaign submitted for admin approval. Balance will be charged after it is marked sent.", "success");
     await loadOutboxRecords();
   } catch (error) {
     console.error("Campaign submission error:", error);
