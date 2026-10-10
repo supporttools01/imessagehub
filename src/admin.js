@@ -826,6 +826,10 @@ async function saveCampaignResults(campaign, card, button) {
   const failed = Number(failedInput?.value);
   const recipientCount = Math.max(0, Number(campaign.total_recipients) || (Array.isArray(campaign.phones) ? campaign.phones.length : 0));
 
+  if (recipientCount < 1) {
+    showToast("This campaign has no recipient records to update.", "error");
+    return;
+  }
   if (!Number.isInteger(delivered) || !Number.isInteger(failed) || delivered < 0 || failed < 0) {
     showToast("Enter whole, non-negative delivery counts.", "error");
     return;
