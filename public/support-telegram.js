@@ -22,12 +22,16 @@
   }
 
   function ensureSupportView() {
-    if (document.getElementById('viewSupport')) return;
     const area = document.querySelector('.platform-content-area');
     if (!area) return;
-    const section = document.createElement('section');
-    section.id = 'viewSupport';
-    section.className = 'view-panel hidden';
+    let section = document.getElementById('viewSupport');
+    if (!section) {
+      section = document.createElement('section');
+      section.id = 'viewSupport';
+      section.className = 'view-panel hidden';
+      area.appendChild(section);
+    }
+    section.innerHTML = '';
     section.innerHTML = `
       <div class="breadcrumb-bar">Help / Support</div>
       <div class="portal-card">
@@ -43,7 +47,6 @@
           </div>
         </div>
       </div>`;
-    area.appendChild(section);
   }
 
   function openSupportView() {
@@ -103,8 +106,10 @@
     addStyles();
     ensureSupportView();
     ensureSidebarSupport();
-    ensureDropdownSupport();
-    ensureFloatingSupport();
+    // Keep support contacts inside the dedicated Support screen; remove the old floating shortcut.
+    document.getElementById('telegramSupportFloat')?.remove();
+    document.querySelectorAll('.telegram-support-dropdown').forEach(link => link.remove());
+    document.querySelectorAll('.telegram-support-float').forEach(link => link.remove());
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
