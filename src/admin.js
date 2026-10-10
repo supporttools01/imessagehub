@@ -882,8 +882,11 @@ async function updateCampaignWorkflow(action, campaign, button) {
       return;
     }
     sentCounts = { p_delivered_count: delivered, p_failed_count: failed };
+    const chargeableCost = recipientCount > 0
+      ? Math.round((Number(campaign.total_cost) || 0) * delivered / recipientCount * 10000) / 10000
+      : 0;
     const confirmed = window.confirm(
-      `Mark this campaign as sent with ${delivered} delivered and ${failed} failed? The customer's balance will be charged ${money(campaign.total_cost)} exactly once.`
+      `Mark this campaign as sent with ${delivered} delivered and ${failed} failed? The customer's balance will be charged ${money(chargeableCost)} for delivered messages only.`
     );
     if (!confirmed) return;
   }
