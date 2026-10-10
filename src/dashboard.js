@@ -239,7 +239,7 @@ function showRouteActivationNotice(show) {
 
 async function switchView(targetViewId) {
   viewPanels.forEach((panel) => panel.classList.add("hidden"));
-  $(targetViewId)?.classList.remove("hidden");
+  document.getElementById(targetViewId)?.classList.remove("hidden");
 
   menuItems.forEach((item) => {
     item.classList.toggle("active", item.getAttribute("data-view") === targetViewId);
