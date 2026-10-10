@@ -81,3 +81,30 @@ body{overflow-x:hidden}
   .user-dropdown-menu{position:fixed!important;top:70px!important;right:10px!important;width:min(280px,calc(100vw - 20px))!important}
 }
 @media(max-width:390px){.topbar-brand-center{max-width:138px!important}.ios-brand-logo{width:132px}.balance-number{font-size:13px!important}.topbar-balance-pill{padding:0 6px!important}.btn-topup-mini{display:none!important}.ios-overview-grid{gap:8px}.ios-metric-card{padding:12px 10px}.ios-metric-icon{width:38px;height:38px}.ios-metric-value{font-size:21px}.ios-quick-grid{gap:6px}.ios-quick-card{font-size:8px}.welcome-saas-banner{padding:25px 18px!important}}
+
+
+/* Consistent iMessage Hub glass depth — visual-only, no layout changes */
+:root{--imh-glass-border:rgba(126,177,242,.34);--imh-glass-shadow:0 18px 42px rgba(20,67,128,.12),inset 0 1px 0 rgba(255,255,255,.92)}
+.portal-card,.cred-card,.stat-box-panel,.admin-head,.admin-stats>div,.panel,.support-card,.support-hero-card,.payment-summary,.modal-card,.ios-payment-qr-card,.admin-history-card,.admin-user-card,.admin-route-row{
+  border-color:var(--imh-glass-border)!important;
+  box-shadow:var(--imh-glass-shadow)!important;
+  backdrop-filter:blur(18px) saturate(1.16);
+  -webkit-backdrop-filter:blur(18px) saturate(1.16);
+  transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;
+}
+.portal-card,.cred-card,.stat-box-panel,.admin-head,.admin-stats>div,.panel,.support-card,.payment-summary,.ios-payment-qr-card,.admin-history-card,.admin-user-card,.admin-route-row{
+  background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(239,246,255,.88))!important;
+}
+.portal-card:hover,.cred-card:hover,.stat-box-panel:hover,.admin-stats>div:hover,.support-card:hover,.admin-history-card:hover,.admin-user-card:hover{
+  border-color:rgba(55,143,255,.48)!important;
+  box-shadow:0 23px 48px rgba(20,86,164,.16),inset 0 1px 0 rgba(255,255,255,.98)!important;
+}
+.btn-primary,.btn-small-primary,.btn-get-started,.support-action-button,.ios-payment-card .btn-primary{
+  box-shadow:0 9px 0 rgba(6,65,148,.09),0 14px 26px rgba(20,126,245,.22),inset 0 1px 0 rgba(255,255,255,.32)!important;
+}
+.btn-secondary,.tier-pill,.portal-input, input.portal-input, select.portal-input, textarea.portal-input{
+  border-color:rgba(128,166,216,.42)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 5px 14px rgba(31,74,126,.045);
+}
+.platform-topbar{backdrop-filter:blur(24px) saturate(1.25)!important;-webkit-backdrop-filter:blur(24px) saturate(1.25)!important}
+@media(prefers-reduced-motion:reduce){.portal-card,.cred-card,.stat-box-panel,.admin-head,.admin-stats>div,.panel,.support-card,.payment-summary,.modal-card,.ios-payment-qr-card,.admin-history-card,.admin-user-card,.admin-route-row{transition:none!important}}
