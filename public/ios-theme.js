@@ -3,6 +3,20 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 
   function clickView(viewId) {
+    if (viewId === 'viewSupport') {
+      const support = $('#viewSupport');
+      if (support) {
+        $('.view-panel').forEach((panel) => panel.classList.add('hidden'));
+        support.classList.remove('hidden');
+        const menu = $('[data-view="viewSupport"]');
+        if (menu) {
+          $('.platform-menu .menu-item').forEach((item) => item.classList.remove('active'));
+          menu.classList.add('active');
+        }
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 20);
+        return;
+      }
+    }
     const trigger = $(`[data-view="${viewId}"]`);
     if (trigger) trigger.click();
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 20);
