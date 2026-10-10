@@ -183,6 +183,7 @@
       <button class="ios-bottom-item" type="button" data-ios-nav="viewNewCampaign">${icons.campaign}<span>Campaigns</span></button>
       <button class="ios-bottom-item" type="button" data-ios-nav="viewOutbox">${icons.outbox}<span>Outbox</span></button>
       <button class="ios-bottom-item" type="button" data-ios-nav="viewReports">${icons.report}<span>Reports</span></button>
+      <button class="ios-bottom-item" type="button" data-ios-nav="viewSupport">${icons.bubble}<span>Support</span></button>
       <button class="ios-bottom-item" type="button" data-ios-nav="viewSettings">${icons.settings}<span>Settings</span></button>
     </nav>`;
   }
@@ -382,6 +383,7 @@
       const nav = event.target.closest('[data-ios-nav]')?.dataset.iosNav;
       if (nav) {
         if (['viewReports','viewSettings','viewContacts'].includes(nav)) showGeneratedView(nav);
+        else if (nav === 'viewSupport') navigateExisting('viewSupport');
         else navigateExisting(nav);
       }
 
