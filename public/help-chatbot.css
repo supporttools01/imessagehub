@@ -2,4 +2,4 @@
 @media(max-width:560px){.help-chat{right:12px;bottom:84px}.help-chat-launch{min-width:54px;width:54px;height:54px;border-radius:18px}.help-chat-launch b{display:none}.help-chat-panel{position:fixed;left:10px;right:10px;bottom:78px;width:auto;height:min(570px,calc(100dvh - 110px));border-radius:22px}}
 
 /* NX iMessage customer support WhatsApp */
-#viewSupport .support-note::after{content:"WhatsApp Support: +1 (804) 247-8364";display:block;margin-top:10px;padding:10px 12px;border-radius:12px;background:#f0fff6;color:#087a3e;font-weight:800;letter-spacing:.01em;user-select:text}
+#viewSupport .support-note::after{content:"WhatsApp Support: +1 (223) 221-1148";display:block;margin-top:10px;padding:10px 12px;border-radius:12px;background:#f0fff6;color:#087a3e;font-weight:800;letter-spacing:.01em;user-select:text}
