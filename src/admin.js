@@ -852,6 +852,8 @@ async function saveCampaignResults(campaign, card, button) {
       if (deliveredSaved) deliveredSaved.value = String(delivered);
       if (failedSaved) failedSaved.value = String(failed);
     }
+    campaign.delivered_count = delivered;
+    campaign.failed_count = failed;
     showToast("Delivery results saved. You can now mark the campaign as sent.", "success");
     await loadAdminSendingHistory();
   } catch (error) {
