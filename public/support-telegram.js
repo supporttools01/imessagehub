@@ -2,8 +2,10 @@
   if (window.__imessageTelegramSupportLoaded) return;
   window.__imessageTelegramSupportLoaded = true;
 
-  const TELEGRAM_HANDLE = '@Zkillofficial';
-  const TELEGRAM_URL = 'https://t.me/Zkillofficial';
+  const TELEGRAM_HANDLE = '@Adenbraun';
+  const TELEGRAM_URL = 'https://t.me/Adenbraun';
+  const WHATSAPP_NUMBER = '+1 (223) 221-1148';
+  const WHATSAPP_URL = 'https://wa.me/12232211148';
 
   function addStyles() {
     if (document.getElementById('telegramSupportStyles')) return;
@@ -30,9 +32,15 @@
       <div class="breadcrumb-bar">Help / Support</div>
       <div class="portal-card">
         <div class="portal-card-header"><div><span class="eyebrow">CUSTOMER SUPPORT</span><h2>Telegram Support</h2><p>Contact our support team for account, campaign or payment assistance.</p></div></div>
-        <div style="display:grid;gap:12px">
-          <strong style="font-size:20px">${TELEGRAM_HANDLE}</strong>
-          <a href="${TELEGRAM_URL}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:max-content;text-decoration:none">Open Telegram →</a>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px">
+          <div style="display:grid;align-content:start;gap:12px;padding:18px;border:1px solid rgba(120,150,190,.22);border-radius:18px;background:rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)">
+            <strong style="font-size:20px">✈ Telegram · ${TELEGRAM_HANDLE}</strong>
+            <a href="${TELEGRAM_URL}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:max-content;text-decoration:none">Message on Telegram →</a>
+          </div>
+          <div style="display:grid;align-content:start;gap:12px;padding:18px;border:1px solid rgba(120,150,190,.22);border-radius:18px;background:rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)">
+            <strong style="font-size:20px">☏ WhatsApp · ${WHATSAPP_NUMBER}</strong>
+            <a href="${WHATSAPP_URL}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="width:max-content;text-decoration:none">Message on WhatsApp →</a>
+          </div>
         </div>
       </div>`;
     area.appendChild(section);
