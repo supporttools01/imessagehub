@@ -34,3 +34,26 @@ body.platform-body button{font-family:inherit}.sidebar-toggle-btn{border-radius:
 
 .admin-history-status.status-approved{background:#fff5dc;color:#9a6500}.admin-history-status.status-sent{background:#e7f9ef;color:#128548}.admin-history-status.status-failed{background:#ffebee;color:#c52e3e}.admin-history-workflow{min-height:39px;padding:0 18px;border:0;border-radius:12px;color:#fff;font-size:11px;font-weight:850;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease}.admin-history-workflow:hover{transform:translateY(-1px)}.admin-history-workflow:disabled{cursor:wait;opacity:.65}.admin-history-workflow.approve{background:linear-gradient(135deg,#ffb21c,#f18b00);box-shadow:0 8px 20px rgba(241,139,0,.22)}.admin-history-workflow.sent{background:linear-gradient(135deg,#20bf6b,#0d9d54);box-shadow:0 8px 20px rgba(13,157,84,.22)}.admin-history-complete{display:inline-flex;align-items:center;min-height:39px;padding:0 14px;border:1px solid #bfe8d0;border-radius:12px;background:#edfbf3;color:#128548;font-size:10px;font-weight:850}
 @media(max-width:560px){.admin-history-workflow,.admin-history-complete{flex:1 1 100%;justify-content:center}.admin-history-status{white-space:nowrap}}
+
+
+/* Consistent iMessage Hub glass depth — visual-only, preserve admin layout */
+:root{--imh-admin-glass-border:rgba(104,163,237,.32);--imh-admin-glass-shadow:0 18px 42px rgba(15,48,93,.13),inset 0 1px 0 rgba(255,255,255,.94)}
+body.platform-body .portal-card,body.platform-body .admin-head,body.platform-body .admin-stats>div,body.platform-body #routeManagementPanel.panel,body.platform-body .admin-history-toolbar,body.platform-body .admin-history-card,body.platform-body .admin-user-card,body.platform-body .admin-route-row,body.platform-body .admin-user-notifications{
+  border-color:var(--imh-admin-glass-border)!important;
+  box-shadow:var(--imh-admin-glass-shadow)!important;
+  backdrop-filter:blur(18px) saturate(1.16);
+  -webkit-backdrop-filter:blur(18px) saturate(1.16);
+  transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;
+}
+body.platform-body .portal-card,body.platform-body .admin-head,body.platform-body .admin-stats>div,body.platform-body #routeManagementPanel.panel,body.platform-body .admin-history-toolbar,body.platform-body .admin-history-card,body.platform-body .admin-user-card,body.platform-body .admin-route-row,body.platform-body .admin-user-notifications{
+  background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(239,246,255,.89))!important;
+}
+body.platform-body .portal-card:hover,body.platform-body .admin-stats>div:hover,body.platform-body .admin-user-card:hover{
+  border-color:rgba(55,143,255,.5)!important;
+  box-shadow:0 23px 48px rgba(20,86,164,.16),inset 0 1px 0 rgba(255,255,255,.98)!important;
+}
+body.platform-body .btn-primary,body.platform-body .btn-secondary,body.platform-body .admin-history-workflow,body.platform-body .admin-route-toggle{
+  box-shadow:0 8px 0 rgba(6,65,148,.07),0 12px 24px rgba(20,91,176,.13),inset 0 1px 0 rgba(255,255,255,.32)!important;
+}
+body.platform-body .platform-topbar{backdrop-filter:blur(24px) saturate(1.25)!important;-webkit-backdrop-filter:blur(24px) saturate(1.25)!important}
+@media(prefers-reduced-motion:reduce){body.platform-body .portal-card,body.platform-body .admin-head,body.platform-body .admin-stats>div,body.platform-body .admin-user-card,body.platform-body .admin-route-row{transition:none!important}}
