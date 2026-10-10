@@ -536,7 +536,25 @@ function startPaymentTimer() {
   countdownInterval = setInterval(update, 1000);
 }
 
+function normalizeMinimumTopUpCopy() {
+  const modal = $("topUpModal");
+  if (!modal) return;
+  modal.querySelectorAll(".form-help, .form-hint, small, p, span").forEach((node) => {
+    if (node.children.length > 0) return;
+    const text = String(node.textContent || "").trim();
+    if (/minimum\s+(?:top[- ]?up|recharge|topup)\s+amount\s*:?\s*\$?\s*1(?:\.00)?\.?/i.test(text)) {
+      node.textContent = "Minimum top-up amount: 10 USDT.";
+    }
+  });
+  const custom = $("customTopUpAmount");
+  if (custom) {
+    custom.min = "10";
+    custom.placeholder = "Minimum 10 USDT";
+  }
+}
+
 function ensureCustomAmountUI() {
+  normalizeMinimumTopUpCopy();
   if ($("customTopUpAmount")) return;
   const tierPills = document.querySelector(".tier-pills");
   if (!tierPills) return;
@@ -553,6 +571,7 @@ function ensureCustomAmountUI() {
     <div class="form-help">Minimum recharge is 10 USDT.</div>`;
 
   tierPills.insertAdjacentElement("afterend", wrapper);
+  normalizeMinimumTopUpCopy();
 
   $("customTopUpAmount")?.addEventListener("input", (event) => {
     const amount = Number.parseFloat(event.target.value);
