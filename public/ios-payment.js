@@ -2,7 +2,7 @@
   if (window.__iosPaymentThemeLoaded) return;
   window.__iosPaymentThemeLoaded = true;
 
-  const WALLET_ADDRESS = 'TRyG8EbfkSXbTUepT8zGdmfUKsUmKiXpEZ';
+  const WALLET_ADDRESS = 'TWhUtsbWiR3gQE6yi9CirRQsR1zKAR9FJd';
 
   const init = () => {
     const modal = document.getElementById('topUpModal');
@@ -15,6 +15,13 @@
 
     const walletAddress = document.getElementById('usdtWalletAddress');
     if (walletAddress) walletAddress.value = WALLET_ADDRESS;
+    // Generate the QR from the same current address displayed in the copy field.
+    // This avoids shipping a stale, separately-maintained QR image.
+    const qrImage = modal.querySelector('.ios-qr-wrap img');
+    if (qrImage) {
+      qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=' + encodeURIComponent(WALLET_ADDRESS);
+      qrImage.alt = 'USDT TRC20 payment QR code for ' + WALLET_ADDRESS;
+    }
     const walletBox = walletAddress?.closest('.form-section') || walletAddress?.parentElement;
 
     if (walletBox && !card.querySelector('.ios-payment-qr-card')) {
