@@ -3,9 +3,20 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 
   function clickView(viewId) {
+    if (viewId === 'viewSupport') {
+      const supportPanel = document.getElementById('viewSupport');
+      if (supportPanel) {
+        // Bypass hidden sidebar click handlers and show the actual support panel directly.
+        document.querySelectorAll('.view-panel').forEach((panel) => panel.classList.add('hidden'));
+        supportPanel.classList.remove('hidden');
+        document.querySelectorAll('[data-view]').forEach((item) => {
+          item.classList.toggle('active', item.getAttribute('data-view') === 'viewSupport');
+        });
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 20);
+        return;
+      }
+    }
     const trigger = document.querySelector(`[data-view="${viewId}"]`);
-    // Always delegate view changes to the portal's main navigation handler.
-    // This avoids hiding every panel through a single-element query (which broke Support).
     if (trigger) trigger.click();
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 20);
   }
