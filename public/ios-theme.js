@@ -3,21 +3,9 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 
   function clickView(viewId) {
-    if (viewId === 'viewSupport') {
-      const support = $('#viewSupport');
-      if (support) {
-        $('.view-panel').forEach((panel) => panel.classList.add('hidden'));
-        support.classList.remove('hidden');
-        const menu = $('[data-view="viewSupport"]');
-        if (menu) {
-          $('.platform-menu .menu-item').forEach((item) => item.classList.remove('active'));
-          menu.classList.add('active');
-        }
-        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 20);
-        return;
-      }
-    }
-    const trigger = $(`[data-view="${viewId}"]`);
+    const trigger = document.querySelector(`[data-view="${viewId}"]`);
+    // Always delegate view changes to the portal's main navigation handler.
+    // This avoids hiding every panel through a single-element query (which broke Support).
     if (trigger) trigger.click();
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 20);
   }
