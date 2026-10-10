@@ -105,7 +105,7 @@ const routeRadios = $$('input[name="campaignRoute"]');
 let currentUser = null;
 let currentProfile = null;
 let currentWalletBalance = 0;
-let selectedTopUpAmount = 99;
+let selectedTopUpAmount = 10;
 let countdownInterval = null;
 let parsedCampaignNumbers = [];
 let selectedSourceFileName = "";
@@ -548,15 +548,15 @@ function ensureCustomAmountUI() {
     <label for="customTopUpAmount" class="portal-label">Custom Amount</label>
     <div style="position:relative;display:flex;align-items:center;">
       <span style="position:absolute;left:13px;color:#7b8798;font-weight:800;">$</span>
-      <input id="customTopUpAmount" class="portal-input" type="number" min="1" step="0.01" placeholder="Enter custom amount" style="padding-left:28px;" />
+      <input id="customTopUpAmount" class="portal-input" type="number" min="10" step="0.01" placeholder="Minimum 10 USDT" style="padding-left:28px;" />
     </div>
-    <div class="form-help">Enter any amount of $1.00 or more.</div>`;
+    <div class="form-help">Minimum recharge is 10 USDT.</div>`;
 
   tierPills.insertAdjacentElement("afterend", wrapper);
 
   $("customTopUpAmount")?.addEventListener("input", (event) => {
     const amount = Number.parseFloat(event.target.value);
-    if (!Number.isFinite(amount) || amount < 1) return;
+    if (!Number.isFinite(amount) || amount < 10) return;
     selectedTopUpAmount = amount;
     $$(".tier-pill").forEach((pill) => pill.classList.remove("active"));
     if (els.usdtAmountDisplay) els.usdtAmountDisplay.textContent = money(amount);
@@ -615,7 +615,7 @@ $$(".tier-pill").forEach((pill) => {
   pill.addEventListener("click", () => {
     $$(".tier-pill").forEach((item) => item.classList.remove("active"));
     pill.classList.add("active");
-    selectedTopUpAmount = Number(pill.dataset.amount) || 99;
+    selectedTopUpAmount = Number(pill.dataset.amount) || 10;
     const custom = $("customTopUpAmount");
     if (custom) custom.value = "";
     if (els.usdtAmountDisplay) els.usdtAmountDisplay.textContent = money(selectedTopUpAmount);
@@ -638,11 +638,11 @@ els.btnSubmitPaid?.addEventListener("click", async () => {
   }
 
   const customValue = Number.parseFloat($("customTopUpAmount")?.value || "");
-  if (Number.isFinite(customValue) && customValue >= 1) selectedTopUpAmount = customValue;
+  if (Number.isFinite(customValue) && customValue >= 10) selectedTopUpAmount = customValue;
   const txHash = els.usdtTxHash?.value.trim() || "";
 
-  if (!Number.isFinite(selectedTopUpAmount) || selectedTopUpAmount < 1) {
-    showToast("Enter a valid top-up amount.", "error");
+  if (!Number.isFinite(selectedTopUpAmount) || selectedTopUpAmount < 10) {
+    showToast("Minimum recharge is 10 USDT. Enter at least 10.", "error");
     return;
   }
 
