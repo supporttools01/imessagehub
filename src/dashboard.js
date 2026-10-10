@@ -574,11 +574,17 @@ function ensureCustomAmountUI() {
   normalizeMinimumTopUpCopy();
 
   $("customTopUpAmount")?.addEventListener("input", (event) => {
-    const amount = Number.parseFloat(event.target.value);
-    if (!Number.isFinite(amount) || amount < 10) return;
+    const raw = String(event.target.value || "").trim();
+    const amount = raw === "" ? NaN : Number(raw);
+    // Track the typed value even when invalid so a prior $10 tier cannot be submitted by mistake.
     selectedTopUpAmount = amount;
-    $$(".tier-pill").forEach((pill) => pill.classList.remove("active"));
-    if (els.usdtAmountDisplay) els.usdtAmountDisplay.textContent = money(amount);
+    $(".tier-pill").forEach((pill) => pill.classList.remove("active"));
+    if (els.usdtAmountDisplay) {
+      els.usdtAmountDisplay.textContent = Number.isFinite(amount) ? money(amount) : "Enter 10+ USDT";
+    }
+    event.target.setCustomValidity(raw !== "" && (!Number.isFinite(amount) || amount < 10)
+      ? "Minimum top-up amount is 10 USDT."
+      : "");
   });
 }
 
@@ -656,9 +662,22 @@ els.btnSubmitPaid?.addEventListener("click", async () => {
     return;
   }
 
-  const customValue = Number.parseFloat($("customTopUpAmount")?.value || "");
-  if (Number.isFinite(customValue) && customValue >= 10) selectedTopUpAmount = customValue;
+  const customInput = $("customTopUpAmount");
+  const customRaw = String(customInput?.value || "").trim();
+  const customValue = customRaw === "" ? NaN : Number(customRaw);
+  if (customRaw !== "") {
+    selectedTopUpAmount = customValue;
+  }
   const txHash = els.usdtTxHash?.value.trim() || "";
+
+  if (customRaw !== "" && (!Number.isFinite(customValue) || customValue < 10)) {
+    customInput?.setCustomValidity("Minimum top-up amount is 10 USDT.");
+    customInput?.reportValidity();
+    showToast("Minimum recharge is 10 USDT. Requests below 10 cannot be submitted.", "error");
+    customInput?.focus();
+    return;
+  }
+  customInput?.setCustomValidity("");
 
   if (!Number.isFinite(selectedTopUpAmount) || selectedTopUpAmount < 10) {
     showToast("Minimum recharge is 10 USDT. Enter at least 10.", "error");
