@@ -85,6 +85,7 @@
       <button type="button" data-bottom-view="viewNewCampaign"><span class="nav-ico">➤</span><span>Campaigns</span></button>
       <button type="button" data-bottom-view="viewOutbox"><span class="nav-ico">▱</span><span>Outbox</span></button>
       <button type="button" data-bottom-action="reports"><span class="nav-ico">▥</span><span>Reports</span></button>
+      <button type="button" data-bottom-view="viewSupport"><span class="nav-ico">✉</span><span>Support</span></button>
       <button type="button" data-bottom-action="settings"><span class="nav-ico">⚙</span><span>Settings</span></button>`;
     document.body.appendChild(nav);
   }
