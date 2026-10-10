@@ -315,6 +315,31 @@ async function fetchRequests() {
   }
 }
 
+async function deleteTopupRequest(request, button) {
+  if (!supabase || !request?.id || String(request.status || "").toLowerCase() === "paid") return;
+  const identity = request.user_email || request.user_id || "this user";
+  if (!window.confirm(`Delete the uncredited top-up request for ${identity} (${money(request.amount)})?`)) return;
+
+  const original = button?.textContent || "Delete Request";
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Deleting…";
+  }
+  try {
+    const { error } = await supabase.rpc("admin_delete_topup_request", { p_topup_id: request.id });
+    if (error) throw error;
+    showToast("Top-up request deleted.", "success");
+    await fetchRequests();
+  } catch (error) {
+    console.error("Top-up deletion error:", error);
+    showToast(`Could not delete request: ${error.message}`, "error");
+    if (button) {
+      button.disabled = false;
+      button.textContent = original;
+    }
+  }
+}
+
 function renderRequests(requests) {
   if (!adminTableBody) return;
   adminTableBody.innerHTML = "";
@@ -390,6 +415,16 @@ function renderRequests(requests) {
       actionCell.innerHTML = `<span style="color:#087548;font-weight:800;">✓ Credited</span>`;
     } else {
       actionCell.textContent = "—";
+    }
+
+    if (!isPaid) {
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "btn-secondary";
+      deleteButton.style.marginTop = isPending ? "6px" : "0";
+      deleteButton.textContent = "Delete Request";
+      deleteButton.addEventListener("click", () => deleteTopupRequest(request, deleteButton));
+      actionCell.appendChild(deleteButton);
     }
 
     row.append(userCell, amountCell, networkCell, txCell, dateCell, statusCell, actionCell);
@@ -728,6 +763,20 @@ function renderAdminSendingHistory() {
         <div><span>DELIVERED</span><strong>${Number(campaign.delivered_count) || 0}</strong></div>
         <div><span>FAILED</span><strong>${Number(campaign.failed_count) || 0}</strong></div>
       </div>
+      ${canMarkSent ? `
+        <div class="admin-history-result-editor" style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:12px 0;padding:12px;border:1px solid #dbe4ef;border-radius:12px;background:#f8fafc;">
+          <label style="display:flex;flex-direction:column;gap:5px;min-width:120px;flex:1;">
+            <span style="font-size:12px;font-weight:700;">Delivered count</span>
+            <input class="portal-input" data-result-delivered type="number" min="0" max="${Number(campaign.total_recipients) || phones.length}" step="1" value="${Number(campaign.delivered_count) || 0}">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:5px;min-width:120px;flex:1;">
+            <span style="font-size:12px;font-weight:700;">Failed count</span>
+            <input class="portal-input" data-result-failed type="number" min="0" max="${Number(campaign.total_recipients) || phones.length}" step="1" value="${Number(campaign.failed_count) || 0}">
+          </label>
+          <button class="btn-secondary" type="button" data-history-save-results>Save Results</button>
+          <small style="flex-basis:100%;color:#64748b;">Save manual delivery results before marking this campaign as sent. The counts must not exceed total recipients.</small>
+        </div>
+      ` : ""}
       <div class="admin-history-actions">
         <button class="btn-primary" type="button" data-history-toggle>View numbers</button>
         <button class="btn-secondary" type="button" data-history-download ${phones.length ? "" : "disabled"}>Download data</button>
@@ -759,8 +808,49 @@ function renderAdminSendingHistory() {
     card.querySelector("[data-history-sent]")?.addEventListener("click", (event) => {
       updateCampaignWorkflow("sent", campaign, event.currentTarget);
     });
+    card.querySelector("[data-history-save-results]")?.addEventListener("click", (event) => {
+      saveCampaignResults(campaign, card, event.currentTarget);
+    });
     adminHistoryList.appendChild(card);
   });
+}
+
+async function saveCampaignResults(campaign, card, button) {
+  if (!supabase || !campaign?.campaign_id || !card || !button) return;
+
+  const deliveredInput = card.querySelector("[data-result-delivered]");
+  const failedInput = card.querySelector("[data-result-failed]");
+  const delivered = Number(deliveredInput?.value);
+  const failed = Number(failedInput?.value);
+  const recipientCount = Math.max(0, Number(campaign.total_recipients) || (Array.isArray(campaign.phones) ? campaign.phones.length : 0));
+
+  if (!Number.isInteger(delivered) || !Number.isInteger(failed) || delivered < 0 || failed < 0) {
+    showToast("Enter whole, non-negative delivery counts.", "error");
+    return;
+  }
+  if (delivered + failed > recipientCount) {
+    showToast(`Delivered + failed cannot exceed ${recipientCount} recipients.`, "error");
+    return;
+  }
+
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = "Saving…";
+  try {
+    const { error } = await supabase.rpc("admin_set_campaign_results", {
+      p_campaign_id: campaign.campaign_id,
+      p_delivered_count: delivered,
+      p_failed_count: failed
+    });
+    if (error) throw error;
+    showToast("Delivery results saved. You can now mark the campaign as sent.", "success");
+    await loadAdminSendingHistory();
+  } catch (error) {
+    console.error("Campaign results update error:", error);
+    showToast(error.message || "Unable to save delivery results.", "error");
+    button.disabled = false;
+    button.textContent = original;
+  }
 }
 
 async function updateCampaignWorkflow(action, campaign, button) {
