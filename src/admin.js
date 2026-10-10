@@ -765,6 +765,8 @@ function renderAdminSendingHistory() {
       </div>
       ${canMarkSent ? `
         <div class="admin-history-result-editor" style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:12px 0;padding:12px;border:1px solid #dbe4ef;border-radius:12px;background:#f8fafc;">
+          <input type="hidden" data-result-saved-delivered value="${Number(campaign.delivered_count) || 0}">
+          <input type="hidden" data-result-saved-failed value="${Number(campaign.failed_count) || 0}">
           <label style="display:flex;flex-direction:column;gap:5px;min-width:120px;flex:1;">
             <span style="font-size:12px;font-weight:700;">Delivered count</span>
             <input class="portal-input" data-result-delivered type="number" min="0" max="${Number(campaign.total_recipients) || phones.length}" step="1" value="${Number(campaign.delivered_count) || 0}">
@@ -781,7 +783,7 @@ function renderAdminSendingHistory() {
         <button class="btn-primary" type="button" data-history-toggle>View numbers</button>
         <button class="btn-secondary" type="button" data-history-download ${phones.length ? "" : "disabled"}>Download data</button>
         ${canApprove ? '<button class="admin-history-workflow approve" type="button" data-history-approve>Approve</button>' : ""}
-        ${canMarkSent ? '<button class="admin-history-workflow sent" type="button" data-history-sent>Mark as Sent</button>' : ""}
+        ${canMarkSent ? '<button class="admin-history-workflow sent" type="button" data-history-sent>Mark as Sent & Charge</button>' : ""}
         ${isSent ? `<span class="admin-history-complete">✓ Sent successfully · ${campaign.wallet_charged ? "Balance charged" : "Already charged"}</span>` : ""}
       </div>
       <pre class="admin-history-numbers">${escapeHtml(phones.length ? phones.join("\n") : "Numbers are not available for this record.")}</pre>`;
@@ -843,6 +845,13 @@ async function saveCampaignResults(campaign, card, button) {
       p_failed_count: failed
     });
     if (error) throw error;
+    const editor = button.closest(".admin-history-result-editor");
+    if (editor) {
+      const deliveredSaved = editor.querySelector("[data-result-saved-delivered]");
+      const failedSaved = editor.querySelector("[data-result-saved-failed]");
+      if (deliveredSaved) deliveredSaved.value = String(delivered);
+      if (failedSaved) failedSaved.value = String(failed);
+    }
     showToast("Delivery results saved. You can now mark the campaign as sent.", "success");
     await loadAdminSendingHistory();
   } catch (error) {
@@ -856,9 +865,19 @@ async function saveCampaignResults(campaign, card, button) {
 async function updateCampaignWorkflow(action, campaign, button) {
   if (!supabase || !campaign?.campaign_id || !button) return;
 
+  let sentCounts = null;
   if (action === "sent") {
+    const card = button.closest(".admin-history-card");
+    const delivered = Number(card?.querySelector("[data-result-saved-delivered]")?.value ?? campaign.delivered_count ?? 0);
+    const failed = Number(card?.querySelector("[data-result-saved-failed]")?.value ?? campaign.failed_count ?? 0);
+    const recipientCount = Math.max(0, Number(campaign.total_recipients) || (Array.isArray(campaign.phones) ? campaign.phones.length : 0));
+    if (!Number.isInteger(delivered) || !Number.isInteger(failed) || delivered < 0 || failed < 0 || delivered + failed > recipientCount) {
+      showToast("Save valid delivered and failed counts before marking as sent.", "error");
+      return;
+    }
+    sentCounts = { p_delivered_count: delivered, p_failed_count: failed };
     const confirmed = window.confirm(
-      `Mark this campaign as sent? The customer's balance will be charged ${money(campaign.total_cost)} exactly once.`
+      `Mark this campaign as sent with ${delivered} delivered and ${failed} failed? The customer's balance will be charged ${money(campaign.total_cost)} exactly once.`
     );
     if (!confirmed) return;
   }
@@ -869,7 +888,10 @@ async function updateCampaignWorkflow(action, campaign, button) {
 
   try {
     const rpcName = action === "approve" ? "admin_approve_campaign" : "admin_mark_campaign_sent";
-    const { data, error } = await supabase.rpc(rpcName, { p_campaign_id: campaign.campaign_id });
+    const rpcArgs = action === "approve"
+      ? { p_campaign_id: campaign.campaign_id }
+      : { p_campaign_id: campaign.campaign_id, ...sentCounts };
+    const { data, error } = await supabase.rpc(rpcName, rpcArgs);
     if (error) throw error;
     const result = Array.isArray(data) ? data[0] : data;
     if (action === "approve") {
