@@ -57,3 +57,23 @@ body.platform-body .btn-primary,body.platform-body .btn-secondary,body.platform-
 }
 body.platform-body .platform-topbar{backdrop-filter:blur(24px) saturate(1.25)!important;-webkit-backdrop-filter:blur(24px) saturate(1.25)!important}
 @media(prefers-reduced-motion:reduce){body.platform-body .portal-card,body.platform-body .admin-head,body.platform-body .admin-stats>div,body.platform-body .admin-user-card,body.platform-body .admin-route-row{transition:none!important}}
+
+
+/* Contrast repair: keep the original blue glass hero and readable white copy. */
+body.platform-body .admin-head{
+  background:radial-gradient(circle at 92% 5%,rgba(92,215,255,.35),transparent 28%),linear-gradient(135deg,#073c7d,#0f75dd 70%,#21a1ff)!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.28)!important;
+  box-shadow:0 20px 50px rgba(14,92,180,.2),inset 0 1px 0 rgba(255,255,255,.25)!important;
+}
+body.platform-body .admin-head h2,
+body.platform-body .admin-head .eyebrow,
+body.platform-body .admin-head p{color:#fff!important}
+body.platform-body .admin-head .eyebrow{color:#8de5ff!important}
+body.platform-body .admin-head p{color:rgba(255,255,255,.88)!important}
+body.platform-body .admin-head .btn-secondary{
+  background:rgba(255,255,255,.17)!important;
+  border:1px solid rgba(255,255,255,.42)!important;
+  color:#fff!important;
+  box-shadow:0 8px 20px rgba(0,34,82,.16),inset 0 1px 0 rgba(255,255,255,.24)!important;
+}
