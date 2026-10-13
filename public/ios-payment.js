@@ -40,6 +40,14 @@
         </section>`);
     }
 
+    // The QR card can be created above, so query and replace its image only now.
+    // Previously the image lookup ran before insertion and left the legacy static QR visible.
+    const currentQrImage = modal.querySelector('.ios-qr-wrap img');
+    if (currentQrImage) {
+      currentQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=' + encodeURIComponent(WALLET_ADDRESS);
+      currentQrImage.alt = 'USDT TRC20 payment QR code for ' + WALLET_ADDRESS;
+    }
+
     const timer = card.querySelector('.payment-timer');
     if (timer && !card.querySelector('.ios-payment-warning')) {
       timer.insertAdjacentHTML('afterend', '<div class="ios-payment-warning"><span>⚠︎</span><span>After sending the payment, paste the transaction hash / TxID above and tap <b>PAID</b>. The balance is credited only after payment verification.</span></div>');
