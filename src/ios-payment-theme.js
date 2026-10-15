@@ -2,6 +2,8 @@
   if (window.__iosPaymentThemeLoaded) return;
   window.__iosPaymentThemeLoaded = true;
 
+  const QR_ASSET = '/assets/usdt-trc20-qr.svg?v=20261016-wallet';
+
   const init = () => {
     const modal = document.getElementById('topUpModal');
     if (!modal || modal.dataset.iosPaymentReady === '1') return;
@@ -23,7 +25,7 @@
       walletBox.insertAdjacentHTML('beforebegin', `
         <section class="ios-payment-qr-card" aria-label="USDT TRC20 QR payment">
           <div class="ios-qr-wrap">
-            <img src="/assets/usdt-trc20-qr.svg" alt="USDT TRC20 payment QR code" loading="eager" decoding="async" />
+            <img src="${QR_ASSET}" alt="USDT TRC20 payment QR code" loading="eager" decoding="async" />
             <span class="ios-qr-network">TRON</span>
           </div>
           <div class="ios-qr-copy">
