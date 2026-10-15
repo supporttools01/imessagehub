@@ -4,6 +4,10 @@
 
   const WALLET_ADDRESS = 'TC5HoQ5YC6AUzYqfrs26fdRXo6UJ1G8zUM';
   const QR_ASSET = '/assets/usdt-trc20-qr.svg?v=20261016-wallet2';
+  const LEGACY_WALLETS = [
+    'TWhUtsbWiR3gQE6yi9CirRQsR1zKAR9FJd',
+    'TRyG8EbfkSXbTUepT8zGdmfUKsUmKiXpEZ'
+  ];
 
   const init = () => {
     const modal = document.getElementById('topUpModal');
@@ -16,6 +20,16 @@
 
     const walletAddress = document.getElementById('usdtWalletAddress');
     if (walletAddress) walletAddress.value = WALLET_ADDRESS;
+
+    // Repair any stale legacy wallet value that may still exist in an older
+    // dashboard HTML cache before the customer can copy or submit it.
+    LEGACY_WALLETS.forEach((legacy) => {
+      if (walletAddress?.value === legacy) walletAddress.value = WALLET_ADDRESS;
+      document.querySelectorAll('[data-wallet-address], [data-usdt-address]').forEach((el) => {
+        if (el.textContent?.trim() === legacy) el.textContent = WALLET_ADDRESS;
+        if (el.value === legacy) el.value = WALLET_ADDRESS;
+      });
+    });
 
     const qrImage = modal.querySelector('.ios-qr-wrap img');
     if (qrImage) {
@@ -40,7 +54,6 @@
         </section>`);
     }
 
-    // Always set the final QR after the card exists, so no legacy QR can survive.
     const currentQrImage = modal.querySelector('.ios-qr-wrap img');
     if (currentQrImage) {
       currentQrImage.src = QR_ASSET;
