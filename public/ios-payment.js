@@ -3,7 +3,7 @@
   window.__iosPaymentThemeLoaded = true;
 
   const WALLET_ADDRESS = 'TC5HoQ5YC6AUzYqfrs26fdRXo6UJ1G8zUM';
-  const QR_ASSET = '/assets/usdt-trc20-qr.svg?v=20261016-wallet';
+  const QR_ASSET = '/assets/usdt-trc20-qr.svg?v=20261016-wallet2';
 
   const init = () => {
     const modal = document.getElementById('topUpModal');
