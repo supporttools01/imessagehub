@@ -2,7 +2,8 @@
   if (window.__iosPaymentThemeLoaded) return;
   window.__iosPaymentThemeLoaded = true;
 
-  const WALLET_ADDRESS = 'TWhUtsbWiR3gQE6yi9CirRQsR1zKAR9FJd';
+  const WALLET_ADDRESS = 'TC5HoQ5YC6AUzYqfrs26fdRXo6UJ1G8zUM';
+  const QR_ASSET = '/assets/usdt-trc20-qr.svg?v=20261016-wallet';
 
   const init = () => {
     const modal = document.getElementById('topUpModal');
@@ -15,11 +16,10 @@
 
     const walletAddress = document.getElementById('usdtWalletAddress');
     if (walletAddress) walletAddress.value = WALLET_ADDRESS;
-    // Generate the QR from the same current address displayed in the copy field.
-    // This avoids shipping a stale, separately-maintained QR image.
+
     const qrImage = modal.querySelector('.ios-qr-wrap img');
     if (qrImage) {
-      qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=' + encodeURIComponent(WALLET_ADDRESS);
+      qrImage.src = QR_ASSET;
       qrImage.alt = 'USDT TRC20 payment QR code for ' + WALLET_ADDRESS;
     }
     const walletBox = walletAddress?.closest('.form-section') || walletAddress?.parentElement;
@@ -28,7 +28,7 @@
       walletBox.insertAdjacentHTML('beforebegin', `
         <section class="ios-payment-qr-card" aria-label="USDT TRC20 QR payment">
           <div class="ios-qr-wrap">
-            <img src="/assets/usdt-trc20-qr.svg?v=20260818" alt="USDT TRC20 payment QR code" loading="eager" decoding="async" />
+            <img src="${QR_ASSET}" alt="USDT TRC20 payment QR code" loading="eager" decoding="async" />
             <span class="ios-qr-network">TRON</span>
           </div>
           <div class="ios-qr-copy">
@@ -40,11 +40,10 @@
         </section>`);
     }
 
-    // The QR card can be created above, so query and replace its image only now.
-    // Previously the image lookup ran before insertion and left the legacy static QR visible.
+    // Always set the final QR after the card exists, so no legacy QR can survive.
     const currentQrImage = modal.querySelector('.ios-qr-wrap img');
     if (currentQrImage) {
-      currentQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=' + encodeURIComponent(WALLET_ADDRESS);
+      currentQrImage.src = QR_ASSET;
       currentQrImage.alt = 'USDT TRC20 payment QR code for ' + WALLET_ADDRESS;
     }
 
